@@ -35,7 +35,7 @@ ifeq ($(TOOLCHAIN),"gputils")
 	LINK		= gplink
 	MP2HEX		= mp2hex
 	ASM_CMD		= $(ASM) -y -c -p $(PROCESSOR) $< -o $@ $(ASMFLAGS)
-	LINK_CMD	= $(LINK) -m -o $@ -s $(LKR) $(OBJS)
+	LINK_CMD	= $(LINK) -m -c -o $@ -s $(LKR) $(OBJS)
 
 	ASMFLAGS=$(addprefix -D ,$(FLAGS))
 else
