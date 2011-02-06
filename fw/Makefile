@@ -6,8 +6,8 @@ TOOLCHAIN	?= "gputils"
 PROCESSOR	?= 18f4455
 PROJECT		= bootloader
 
-SRCS		= boot.asm boot_asm.asm usb.asm usb_desc.asm vectors.asm xtea.asm
-INCS		= boot_if.inc boot.inc io_cfg.inc usb_defs.inc usb_desc.inc usb.inc P18F4455.INC
+SRCS		= $(wildcard src/*.asm)
+INCS		= $(wildcard inc/*.inc)
 OBJS		= $(SRCS:.asm=.o)
 LKR		= $(PROJECT).lkr
 
@@ -34,7 +34,7 @@ ifeq ($(TOOLCHAIN),"gputils")
 	ASM		= gpasm
 	LINK		= gplink
 	MP2HEX		= mp2hex
-	ASM_CMD		= $(ASM) -y -c -p $(PROCESSOR) $< -o $@ $(ASMFLAGS)
+	ASM_CMD		= $(ASM) -y -c -p $(PROCESSOR) $< -o $@ $(ASMFLAGS) -Iinc
 	LINK_CMD	= $(LINK) -m -c -o $@ -s $(LKR) $(OBJS)
 
 	ASMFLAGS=$(addprefix -D ,$(FLAGS))
