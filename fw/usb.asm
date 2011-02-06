@@ -198,7 +198,7 @@ usb_sm_ctrl_copy_pkt
 	decfsz	WREG
 	bra	usb_sm_ctrl_copy_pkt
 usb_sm_ctrl_process
-	lfsr	FSR2, BDT_STAT(ep0Bo)
+	lfsr	FSR2, (0 + ep0Bo) ; BDT_STAT
 	movlw	EP00_OUT
 	cpfseq	USTAT
 	bra	usb_sm_ctrl_in_token
@@ -256,7 +256,7 @@ usb_sm_ctrl_out_trf_rx_end
 ;-----------------------------------------------------------------------------
 	global usb_sm_ctrl_in
 usb_sm_ctrl_in
-	lfsr	FSR2, BDT_STAT(ep0Bi)
+	lfsr	FSR2, (0 + ep0Bi) ; BDT_STAT
 	btfsc	INDF2, UOWN	; BDT_STAT(ep0Bi)
 	bra	$ - 2
 	; Must check if in ADR_PENDING_STATE
@@ -284,7 +284,7 @@ usb_sm_ctrl_in_tx
 	movlw	(_USIE | _DAT1 | _DTSEN)
 	btfss	INDF2, DTS	; BDT_STAT(ep0Bi)
 	movlw	(_USIE | _DAT0 | _DTSEN)
-	movwf	BDT_STAT(ep0Bi)
+	movwf	(0 + ep0Bi) ; BDT_STAT
 	return
 usb_sm_ctrl_in_tx_end
 	rcall	usb_sm_prepare_next_setup_trf
@@ -738,7 +738,7 @@ usb_sm_ctrl_setup_end_in
 	cpfslt	Count	; wLegth < Count
 	movwf	Count	; Yes Count = wLegth
 	; FSR2 must be pointed to BDT_STAT(ep0Bi)
-	lfsr	FSR2, BDT_STAT(ep0Bi)
+	lfsr	FSR2, (0 + ep0Bi) ; BDT_STAT
 	rcall	usb_sm_ctrl_tx
 	; Prepare OUT EP to respond to early termination
 	;
@@ -749,7 +749,7 @@ usb_sm_ctrl_setup_end_in
 	; the two transactions.
 	movlw	USB_SM_CTRL_TRF_TX
 	movwf	usb_sm_ctrl_state
-	lfsr	FSR2, BDT_ADRH(ep0Bo)
+	lfsr	FSR2, (3 + ep0Bo) ; BDT_ADRH
 	movlw	HIGH(SetupPkt)
 	movwf	POSTDEC2		; BDT_ADRH(ep0Bo)
 	movlw	LOW(SetupPkt)
@@ -760,7 +760,7 @@ usb_sm_ctrl_setup_end_in
 	movwf	POSTDEC2		; BDT_STAT(ep0Bo)
 	; Prepare IN EP to transfer data, Cnt should have
 	; been initialized by responsible request owner.
-	lfsr	FSR2, BDT_ADRH(ep0Bi)
+	lfsr	FSR2, (3 + ep0Bi) ; BDT_ADRH
 	movlw	HIGH(CtrlTrfData)
 	movwf	POSTDEC2		; BDT_ADRH(ep0Bi)
 	movlw	LOW(CtrlTrfData)
@@ -776,7 +776,7 @@ usb_sm_ctrl_setup_end_out
 	; Prepare IN EP to respond to early termination
 	; This is the same as a Zero Length Packet Response
 	; for control transfer without a data stage
-	lfsr	FSR2, BDT_CNT(ep0Bi)
+	lfsr	FSR2, (1 + ep0Bi) ; BDT_CNT
 	clrf	POSTDEC2		; BDT_CNT(ep0Bi)
 	movlw	(_USIE | _DAT1 | _DTSEN)
 	movwf	POSTDEC2		; BDT_STAT(ep0Bi)
@@ -805,7 +805,7 @@ usb_stall_ep0
 	UD_TX	't'
 	;bsf	UEP0, EPSTALL
 	; Must also prepare EP0 to receive the next SETUP transaction.
-	lfsr	FSR2, BDT_ADRH(ep0Bo)
+	lfsr	FSR2, (3 + ep0Bo) ; BDT_ADRH
 	movlw	HIGH(SetupPkt)
 	movwf	POSTDEC2		; BDT_ADRH(ep0Bo)
 	movlw	LOW(SetupPkt)

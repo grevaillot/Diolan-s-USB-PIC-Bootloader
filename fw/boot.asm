@@ -308,24 +308,24 @@ usb_sm_HID_init_EP
 	movwf	HID_UEP		; Enable 2 data pipes
 	movlb	HIGH(HID_BD_OUT)
 	movlw	HID_OUT_EP_SIZE
-	movwf	BDT_CNT(HID_BD_OUT)
+	movwf	(1 + HID_BD_OUT) ; BDT_CNT
 	movlw	LOW(hid_report_out)
-	movwf	BDT_ADRL(HID_BD_OUT)
+	movwf	(2 + HID_BD_OUT) ; BDT_ADRL
 	movlw	HIGH(hid_report_out)
-	movwf	BDT_ADRH(HID_BD_OUT)
+	movwf	(3 + HID_BD_OUT) ; BDT_ADRH
 	movlw	(_USIE | _DAT0 | _DTSEN)
-	movwf	BDT_STAT(HID_BD_OUT)
+	movwf	(0 + HID_BD_OUT) ; BDT_STAT
 #else
 	movlw	(EP_IN | HSHK_EN)
 	movwf	HID_UEP		; Enable 1 data pipe
 #endif
 	movlb	HIGH(HID_BD_IN)
 	movlw	LOW(hid_report_in)
-	movwf	BDT_ADRL(HID_BD_IN)
+	movwf	(2 + HID_BD_IN) ; DBT_ADRL
 	movlw	HIGH(hid_report_in)
-	movwf	BDT_ADRH(HID_BD_IN)
+	movwf	(3 + HID_BD_IN) ; BDT_ADRH
 	movlw	(_UCPU | _DAT1)
-	movwf	BDT_STAT(HID_BD_IN)
+	movwf	(0 + HID_BD_IN) ; BDT_STAT
 	movlb	0
 	clrf	(boot_rep + cmd)
 	return
@@ -341,7 +341,7 @@ usb_sm_HID_init_EP
 hid_send_report
 	movf	(boot_rep + cmd), W	; Z flag affected
 	bz	hid_send_report_end
-	lfsr	FSR2, BDT_STAT(HID_BD_IN)
+	lfsr	FSR2, (0 + HID_BD_IN) ; BDT_STAT
 	btfsc	POSTINC2, UOWN		; BDT_STAT(HID_BD_IN)
 	bra	hid_send_report_end
 	; Copy boot_rep into hid_report_in
